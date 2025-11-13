@@ -95,6 +95,11 @@ class PionSSA:
 		self.load_params(fit_type)
 		self.set_params(replica)
 
+		# set pion LCWF model parameters
+		self.pion_model = options.get('pion_model', 'HZW')
+		self.pion_model_params = options.get('pion_model_params', [25.11, 0.033, 0.556, 0.3]) # param order: A, B, \beta, m
+		assert self.pion_model in ['HZW'], f'pion model {self.pion_model} not recognized'
+		print(f'--> using model {self.pion_model} for pion LCWF with parameters {self.pion_model_params}')
 
 	#-- load polarized non-singlet dipole amplitudes
 	def load_dipoles(self):
@@ -161,14 +166,10 @@ class PionSSA:
 		return (1+(t/Q02))**(-2)
 
 	#-- pion light-cone wavefunction (HZW model is from 1305.7391, see Table I)
-	def psi(self, x12, z, model='HZW'):
-		if model == 'HZW':
-			anorm = 24.80
-			beta = 0.589
-			mq = 0.3
-			return anorm * np.sqrt(np.pi * 8 * (beta**2) * z * (1-z)) * np.exp(- mq**2 / (8 * (beta**2) * z * (1-z))) * np.exp(-(x12**2) * (2*(beta**2) * z * (1-z)))
-		else: 
-			raise ValueError(f'model {model} not recognized')
+	def psi(self, x12, z):
+		if self.pion_model == 'HZW':
+			a,b,beta,m = self.pion_model_params
+			return (a/(2*np.pi))* (1 + b*(6 - 30*z*(1-z))) * np.exp(- m**2 / (8 * (beta**2) * z * (1-z))) * np.exp(-(x12**2) * (2*(beta**2) * z * (1-z)))
 	
 	#-- photon-pion wavefunction overlaps
 	def phi2(self, x12, z, Q):
