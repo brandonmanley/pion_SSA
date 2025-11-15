@@ -423,22 +423,18 @@ class PionSSA:
 		eta0index = int(np.ceil(eta0/self.deta))+1
 		eta = np.sqrt(self.Nc/(2*np.pi))*np.log(1/x)
 		
-		jetai = int(np.ceil(np.sqrt(self.Nc/(2.*np.pi))*np.log(1./x)/self.deta))
-		jetaf = int(np.ceil(np.sqrt(self.Nc/(2.*np.pi))*np.log(Q2/(x*self.lambdaIR))/self.deta))
+		is10f = int(np.ceil(np.sqrt(self.Nc/(2.*np.pi))*np.log(Q2/(self.lambdaIR**2))/self.deta))
+		etaf = np.sqrt(self.Nc/(2.*np.pi))*np.log(1/x)
 
 		ppdf_minus=[0,0,0]
-
 		for iflav, flav in enumerate(['u', 'd', 's']):
-			for j in range(eta0index,jetai-1 +1):
-				for i in range(0,j-eta0index-1 +1):
-					ppdf_minus[iflav] += (self.deta**2) * self.dipoles[f'QNS{flav}'][i,j]
-
-			for j in range(jetai-1+1,jetaf-1 +1):
-				for i in range(j-jetai,j-eta0index-1 +1):
+			for i in range(0, is10f):
+				jetai = int(np.ceil(round((self.deta*(i)+eta0)/self.deta,6)))
+				jetaf = int(np.ceil(round((self.deta*(i)+etaf)/self.deta,6)))
+				for j in range(jetai, jetaf):
 					ppdf_minus[iflav] += (self.deta**2) * self.dipoles[f'QNS{flav}'][i,j]
 
 		ppdf_minus = np.array(ppdf_minus)*(1./(np.pi**2))
-				
 		return ppdf_minus
 	
 
